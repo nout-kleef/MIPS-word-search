@@ -89,6 +89,7 @@ int contain(char *string, char *word)
 // this functions find the first match in the grid
 void strfind()
 {
+  int wordfound = 0;
   int idx = 0;
   int grid_idx = 0;
   char *word;
@@ -103,13 +104,14 @@ void strfind()
         print_char(' ');
         print_word(word);
         print_char('\n');
-        return;
+        wordfound = 1; // flag that we've found a word
       }
     }
 
     grid_idx++;
   }
-
+  if (wordfound)
+    return; // skip over the "-1\n". We've already printed.
   print_string("-1\n");
 }
 
