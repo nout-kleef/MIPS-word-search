@@ -69,6 +69,14 @@ void print_word(char *word)
   }
 }
 
+void print_match(int idx, char *word)
+{
+  print_int(idx);
+  print_char(' ');
+  print_word(word);
+  print_char('\n');
+}
+
 // function to see if the string contains the (\n terminated) word
 int contain(char *string, char *word)
 {
@@ -100,10 +108,7 @@ void strfind()
       word = dictionary + dictionary_idx[idx]; // point to 1st char of dict word
       if (contain(grid + grid_idx, word))
       {
-        print_int(grid_idx);
-        print_char(' ');
-        print_word(word);
-        print_char('\n');
+        print_match(grid_idx, word);
         wordfound = 1; // flag that we've found a word
       }
     }
