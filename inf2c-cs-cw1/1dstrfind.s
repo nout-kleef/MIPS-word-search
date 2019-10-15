@@ -165,13 +165,16 @@ main_end:
         syscall
         
 # FUNCTION: void strfind(void)
+# $s3 = int	wordfound
 # $s2 = int 	idx
 # $t4 = int 	grid_idx
 # $t5 = char *	word
 strfind:
-	subiu	$sp, $sp, 8
-	sw	$ra, 4($sp)			# store $ra
-	sw	$s2, 0($sp)			# store idx
+	subiu	$sp, $sp, 12
+	sw	$ra, 8($sp)			# store $ra
+	sw	$s2, 4($sp)			# store caller's $s2
+	sw	$s3, 0($sp)			# store caller's $s3
+	move	$s3, $0				# wordfound = 0;
 	move	$s2, $0				# idx = 0;
 	move	$t4, $0				# grid_idx = 0;
 strfind_wl:
@@ -191,10 +194,12 @@ strfind_fl:
 	move	$a0, $t4
 	move	$a1, $t5
 	jal	print_match			# NB: $sp already stored
-	lw	$s2, 0($sp)			# restore idx
-	lw	$ra, 4($sp)			# restore $ra
-	addiu	$sp, $sp, 8
-	jr	$ra
+	# flag that we've found a matching word
+	addi	$s3, $0, 1			# wordfound = 1;
+	# lw	$s2, 0($sp)			# restore idx
+	# lw	$ra, 4($sp)			# restore $ra
+	# addiu	$sp, $sp, 8
+	# jr	$ra
 strfind_fc:
 	addi	$s2, $s2, 4			# idx++
 	j	strfind_fl			# }
@@ -202,13 +207,16 @@ strfind_fb:
 	addi	$t4, $t4, 1			# grid_idx++;
 	j	strfind_wl			# }
 strfind_wb:
+	bne	$s3, $0, strfind_return		# if(wordfound) return;
 	li	$v0, 4
 	la	$a0, no_match
 	syscall					# print_string("-1\n");
-	lw	$s2, 0($sp)			# restore idx
-	lw	$ra, 4($sp)			# restore $ra
-	addiu	$sp, $sp, 8
-	jr	$ra				# [implied] return;
+strfind_return:
+	lw	$s3, 0($sp)			# restore caller's registers
+	lw	$s2, 4($sp)
+	lw	$ra, 8($sp) 
+	addiu	$sp, $sp, 12
+	jr	$ra
 	
 # FUNCTION: int contain(char *string, char *word)
 # parameters
