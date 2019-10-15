@@ -10,7 +10,6 @@
 
 // Code assumes sizeof(int) == 4.
 
-
 //---------------------------------------------------------------------------
 // C definitions for SPIM system calls
 //---------------------------------------------------------------------------
@@ -23,11 +22,11 @@ int read_int()
     scanf("%i", &i);
     return i;
 }
-void read_string(char* s, int size) { fgets(s, size, stdin); }
+void read_string(char *s, int size) { fgets(s, size, stdin); }
 
-void print_char(int c)     { putchar(c); }   
-void print_int(int i)      { printf("%i", i); }
-void print_string(char* s) { printf("%s", s); }
+void print_char(int c) { putchar(c); }
+void print_int(int i) { printf("%i", i); }
+void print_string(char *s) { printf("%s", s); }
 
 //---------------------------------------------------------------------------
 // Global variables
@@ -43,42 +42,42 @@ int loop_count;
 
 int get_hex_char(int i)
 {
-    if (i < 10) 
+    if (i < 10)
         return '0' + i;
-    else 
+    else
         return 'a' + (i - 10);
 }
 //---------------------------------------------------------------------------
 // MAIN function
 //---------------------------------------------------------------------------
 
-int main (void)
+int main(void)
 {
     // Read in number to print in hex
     print_string("Enter decimal number: ");
     input_num = read_int();
 
-    print_string("\nThe number in hex is: "); 
+    print_string("\nThe number in hex is: ");
 
-    // Loop 8 times, once for each hex digit. 
-    loop_count = 8; 
-    while (loop_count != 0) {
-
+    // Loop 8 times, once for each hex digit.
+    loop_count = 8;
+    while (loop_count != 0)
+    {
 
         // Get the leftmost nibble (4 bits) of input_num.
-        // The >> operation on an int var is arithmetic shift right. 
+        // The >> operation on an int var is arithmetic shift right.
         // We use the bitwise and to get the effect of a logical shift right.
 
-        int left_nibble = (input_num >> 28) & 0xf; 
+        int left_nibble = (input_num >> 28) & 0xf;
 
         // Compute the hex character corresponding to the leftmost nibble.
         int hex_char = get_hex_char(left_nibble);
 
         // Output the hex character.
         print_char(hex_char);
-        
+
         // Make the next nibble of input_num the leftmost one
-        input_num = input_num << 4;  
+        input_num = input_num << 4;
         loop_count--;
     }
 
