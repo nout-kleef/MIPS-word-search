@@ -58,6 +58,8 @@ char dictionary[MAX_DICTIONARY_WORDS * (MAX_WORD_SIZE + 1 /* for \n */) + 1 /* f
 int dictionary_idx[MAX_DICTIONARY_WORDS];
 // actual number of words in the dictionary
 int dict_num_words = 0;
+int grid_num_rows = 0;
+int grid_num_cols = 0;
 
 void print_word(char *word)
 {
@@ -80,20 +82,31 @@ void print_match(int row, int col, char *word, char direction)
   print_char('\n');
 }
 
-int contain(char *string, char *word)
+int contain_hor(char *string, char *word)
 {
   while (1)
   {
     if (*string != *word)
-    {
-      return (*word == '\n');
-    }
-
+      return *word == '\n';
     string++;
     word++;
   }
+}
 
-  return 0;
+int contain_ver(char *string, char *word)
+{
+  int row = 0;
+  while (1)
+  {
+    if (*string != *word)
+      return *word == '\n';
+
+    word++; // point to next character in word
+    if (row >= grid_num_rows - 1)
+      return *word == '\n';      // we're at the edge. no match unless '\n'
+    string += grid_num_cols + 1; // point to character "below" current
+    row++;
+  }
 }
 
 void strfind()
@@ -114,9 +127,14 @@ void strfind()
       for (idx = 0; idx < dict_num_words; idx++)
       {
         word = dictionary + dictionary_idx[idx]; // point to dict entry
-        if (contain(grid + grid_idx, word))
+        if (contain_hor(grid + grid_idx, word))
         {
           print_match(ycoord, xcoord, word, 'H');
+          wordfound = 1; // flag that we've found a word
+        }
+        if (contain_ver(grid + grid_idx, word))
+        {
+          print_match(ycoord, xcoord, word, 'V');
           wordfound = 1; // flag that we've found a word
         }
       }
@@ -202,6 +220,21 @@ int main(void)
   fclose(dictionary_file);
   //////////////////////////End of reading////////////////////////
   ///////////////You can add your code here!//////////////////////
+
+  // compute the actual dimensions of the grid
+  char *c = grid;
+  grid_num_rows = 0;
+  while (*c != '\0')
+  {
+    grid_num_cols = 0;
+    grid_num_rows++;
+    while (*c != '\n')
+    {
+      c++;
+      grid_num_cols++;
+    }
+    c++; // pass over '\n'
+  }
 
   idx = 0;
   do
