@@ -129,7 +129,7 @@ END_LOOP2:
 # You can add your code here!
 
 # GLOBAL VARIABLES
-#	$s1 = dict_num_words	int
+# int $s1 = dict_num_words
 
 # storing the starting index of each word in the dictorionary in dictionary_idx
 # $s2 = int	idx
