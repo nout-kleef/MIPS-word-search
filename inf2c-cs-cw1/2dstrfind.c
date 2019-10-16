@@ -95,22 +95,18 @@ int contain_hor(char *string, char *word)
 
 int contain_ver(char *string, char *word)
 {
-  int row = 0;
   while (1)
   {
     if (*string != *word)
       return *word == '\n';
-
-    word++; // point to next character in word
-    if (row >= grid_num_rows - 1)
-      return *word == '\n';      // we're at the edge. no match unless '\n'
     string += grid_num_cols + 1; // point to character "below" current
-    row++;
+    word++;                      // point to next character in word
   }
 }
 
 void strfind()
 {
+  printf("rows: %d, cols: %d\n", grid_num_rows, grid_num_cols);
   int wordfound = 0;
   int idx = 0;
   int grid_idx = 0;
