@@ -233,13 +233,25 @@ strfind_ver_check:
 	la	$a0, grid($t4)			# $a0 = &grid[0] + grid_idx
 	move	$a1, $t5			# $a1 = word
 	jal	contain_ver
-	beq	$v0, $0, strfind_fc		# !contain_ver(...)
+	beq	$v0, $0, strfind_dia_check	# !contain_ver(...)
 	# print the word that was found
 	move	$a0, $s5			# ycoord
 	move	$a1, $s4			# xcoord
 	move	$a2, $t5			# word
 	li	$a3, 0x56			# 'H'
 	jal	print_match			# print_match(ycoord, xcoord, word, 'V');
+	addi	$s3, $0, 1			# wordfound = 1;
+strfind_dia_check:
+	la	$a0, grid($t4)			# $a0 = &grid[0] + grid_idx
+	move	$a1, $t5			# $a1 = word
+	jal	contain_dia
+	beq	$v0, $0, strfind_fc		# !contain_dia(...)
+	# print the word that was found
+	move	$a0, $s5			# ycoord
+	move	$a1, $s4			# xcoord
+	move	$a2, $t5			# word
+	li	$a3, 0x44			# 'D'
+	jal	print_match			# print_match(ycoord, xcoord, word, 'D');
 	addi	$s3, $0, 1			# wordfound = 1;
 strfind_fc:
 	addi	$s2, $s2, 4			# idx++
@@ -283,6 +295,11 @@ contain_hor_wl:
 	bne	$t0, $t1, contain_r		# if(*string != *word)
 	addi	$a0, $a0, 1			# string++;
 	addi	$a1, $a1, 1			# word++;
+	# see C code for explanation of the following
+	lb	$t0, 0($a0)			# $t0 = *string
+	lb	$t1, 0($a1)			# $t1 = *word
+	addi	$t2, $0, 10			# $t2 = '\n'
+	beq	$t0, $t2, contain_r		# if(*string == '\n')
 	j	contain_hor_wl			# while(1)
 contain_r:					# $t1 is still *word
 	addi	$t0, $0, 10			# $t0 = '\n'
@@ -305,10 +322,34 @@ contain_ver_wl:
 	lb	$t1, 0($a1)			# $t1 = *word
 	# NB: contain_r is "part of" contain_hor, but it contains the same instructions
 	bne	$t0, $t1, contain_r		# this is the same for contain_hor
-	addi	$a1, $a1, 1			# word++;
 	addi	$t3, $s7, 1			# $t3 = grid_num_cols + 1;
 	add	$a0, $a0, $t3			# string += grid_num_cols + 1;
+	addi	$a1, $a1, 1			# word++;
 	j	contain_ver_wl			# while(1)
+	
+# FUNCTION: int contain_dia(char *string, char *word)
+# parameters
+#	$a0 = char *	string
+# 	$a1 = char *	word
+# returns $v0
+#	1 if string contains '\n' terminated word - diagonally
+# 	0 otherwise
+# $t0 = *string
+# $t1 = *word
+contain_dia:
+contain_dia_wl:
+	lb	$t0, 0($a0)			# $t0 = *string
+	lb	$t1, 0($a1)			# $t1 = *word
+	bne	$t0, $t1, contain_r		# if(*string != *word)
+	addi	$t3, $s7, 2			# $t3 = grid_num_cols + 2;
+	add	$a0, $a0, $t3			# string += grid_num_cols + 2;
+	addi	$a1, $a1, 1			# word++;
+	# see C code for explanation of the following
+	lb	$t0, 0($a0)			# $t0 = *string
+	lb	$t1, 0($a1)			# $t1 = *word
+	addi	$t2, $0, 10			# $t2 = '\n'
+	beq	$t0, $t2, contain_r		# if(*string == '\n')
+	j	contain_dia_wl			# while(1)
 	
 # FUNCTION: void print_match(int row, int col, char *word, char direction)
 # parameters

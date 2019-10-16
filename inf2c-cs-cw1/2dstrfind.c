@@ -88,8 +88,15 @@ int contain_hor(char *string, char *word)
   {
     if (*string != *word)
       return *word == '\n';
-    string++;
+    string++; // 1 right, 0 down
     word++;
+    // after this increment, we may have run into the following:
+    //      X   X   \n
+    //     [h] [i] [\n]
+    //      X   X   \n
+    // and if our word is "hi\n", we'll still have a match.
+    if (*string == '\n')
+      return *word == '\n';
   }
 }
 
@@ -99,14 +106,31 @@ int contain_ver(char *string, char *word)
   {
     if (*string != *word)
       return *word == '\n';
-    string += grid_num_cols + 1; // point to character "below" current
-    word++;                      // point to next character in word
+    string += grid_num_cols + 1; // 0 right, 1 down
+    word++;
+  }
+}
+
+int contain_dia(char *string, char *word)
+{
+  while (1)
+  {
+    if (*string != *word)
+      return *word == '\n';
+    string += grid_num_cols + 2; // 1 right, 1 down
+    word++;
+    // after this increment, we may have run into the following:
+    //     [h] X  \n
+    //      X [i] \n
+    //      X  X [\n]
+    // and if our word is "hi\n", we'll still have a match.
+    if (*string == '\n')
+      return *word == '\n';
   }
 }
 
 void strfind()
 {
-  printf("rows: %d, cols: %d\n", grid_num_rows, grid_num_cols);
   int wordfound = 0;
   int idx = 0;
   int grid_idx = 0;
@@ -131,6 +155,11 @@ void strfind()
         if (contain_ver(grid + grid_idx, word))
         {
           print_match(ycoord, xcoord, word, 'V');
+          wordfound = 1; // flag that we've found a word
+        }
+        if (contain_dia(grid + grid_idx, word))
+        {
+          print_match(ycoord, xcoord, word, 'D');
           wordfound = 1; // flag that we've found a word
         }
       }
