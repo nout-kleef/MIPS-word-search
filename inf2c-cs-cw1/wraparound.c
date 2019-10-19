@@ -82,21 +82,31 @@ void print_match(int row, int col, char *word, char direction)
   print_char('\n');
 }
 
+int shouldwrap(char *string) // returns true if row or col == 0
+{
+  if (*(string + 1) == '\n')
+    return 1; // final column
+  while (*string++ != '\n')
+    ;
+  return *string == '\0'; // true if final row
+}
+
 int contain_hor(char *string, char *word)
 {
   while (1)
   {
     if (*string != *word)
-      return *word == '\n';
-    string++; // 1 right, 0 down
-    word++;
-    // after this increment, we may have run into the following:
-    //      X   X   \n
-    //     [h] [i] [\n]
-    //      X   X   \n
-    // and if our word is "hi\n", we'll still have a match.
-    if (*string == '\n')
-      return *word == '\n';
+    {
+      if (*string != '\n')
+        return *word == '\n';
+      else // wraparound search. NB don't increment word: we're skipping '\n'
+        string -= grid_num_cols - 1;
+    }
+    else
+    {
+      string++; // 1 right, 0 down
+      word++;
+    }
   }
 }
 
@@ -106,26 +116,40 @@ int contain_ver(char *string, char *word)
   {
     if (*string != *word)
       return *word == '\n';
-    string += grid_num_cols + 1; // 0 right, 1 down
+    if (shouldwrap(string)) // might introduce a bug if *string == '\n'
+      string -= (grid_num_rows - 1) * grid_num_cols;
+    else
+      string += grid_num_cols;
     word++;
   }
 }
 
 int contain_dia(char *string, char *word)
 {
+  int diff = string - grid;
+  int row = diff / grid_num_cols;
+  int col = diff % grid_num_cols;
+
   while (1)
   {
     if (*string != *word)
       return *word == '\n';
-    string += grid_num_cols + 2; // 1 right, 1 down
-    word++;
-    // after this increment, we may have run into the following:
-    //     [h] X  \n
-    //      X [i] \n
-    //      X  X [\n]
-    // and if our word is "hi\n", we'll still have a match.
-    if (*string == '\n')
-      return *word == '\n';
+    if (shouldwrap(string)) // wraparound
+    {
+      while (row > 0 && col > 0)
+      {                              // not in starting position yet
+        string -= grid_num_cols + 1; // 1 up, 1 left
+        row--;
+        col--;
+      }
+    }
+    else
+    {
+      string += grid_num_cols + 1;
+      row++;
+      col++;
+    }
+    word++; // NB string is already in correct position
   }
 }
 
@@ -251,7 +275,7 @@ int main(void)
   grid_num_rows = 0;
   while (*c != '\0')
   {
-    grid_num_cols = 0;
+    grid_num_cols = 1;
     grid_num_rows++;
     while (*c != '\n')
     {

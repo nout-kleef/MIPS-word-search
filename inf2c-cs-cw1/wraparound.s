@@ -147,7 +147,7 @@ END_LOOP2:
 comp_dims_wl_EOF:
 	lb	$t5, 0($t4)				# $t5 = *c
 	beq	$t5, $0, comp_dims_wb_EOF		# while(*c != '\0') {
-	move	$s7, $0					# grid_num_cols = 0;
+	addi	$s7, $0, 1				# grid_num_cols = 1;
 	addi	$s6, $s6, 1				# grid_num_rows++;
 comp_dims_wl_LF:
 	lb	$t5, 0($t4)				# $t5 = *c
@@ -292,19 +292,19 @@ contain_hor:
 contain_hor_wl:
 	lb	$t0, 0($a0)			# $t0 = *string
 	lb	$t1, 0($a1)			# $t1 = *word
-	bne	$t0, $t1, contain_r		# if(*string != *word)
+	bne	$t0, $t1, contain_hor_eqLF	# if(*string != *word)
 	addi	$a0, $a0, 1			# string++;
 	addi	$a1, $a1, 1			# word++;
-	# see C code for explanation of the following
-	lb	$t0, 0($a0)			# $t0 = *string
-	lb	$t1, 0($a1)			# $t1 = *word
-	addi	$t2, $0, 10			# $t2 = '\n'
-	beq	$t0, $t2, contain_r		# if(*string == '\n')
 	j	contain_hor_wl			# while(1)
 contain_r:					# $t1 is still *word
 	addi	$t0, $0, 10			# $t0 = '\n'
 	seq	$v0, $t1, $t0			# "return" = *word == '\n'
 	jr	$ra
+contain_hor_eqLF:
+	bne	$t0, 10, contain_r		# if(*string != '\n')
+	sub	$a0, $a0, $s7			# vvv
+	addi	$a0, $a0, 1			# string -= (grid_num_cols - 1);
+	j	contain_hor_wl			# while(1)
 
 # FUNCTION: int contain_ver(char *string, char *word)
 # parameters
@@ -316,14 +316,27 @@ contain_r:					# $t1 is still *word
 # $t0 = *string
 # $t1 = *word
 contain_ver:
-	move	$t2, $0				# int row = 0;
 contain_ver_wl:
 	lb	$t0, 0($a0)			# $t0 = *string
 	lb	$t1, 0($a1)			# $t1 = *word
 	# NB: contain_r is "part of" contain_hor, but it contains the same instructions
 	bne	$t0, $t1, contain_r		# this is the same for contain_hor
-	addi	$t3, $s7, 1			# $t3 = grid_num_cols + 1;
-	add	$a0, $a0, $t3			# string += grid_num_cols + 1;
+	subiu	$sp, $sp, 4			# PUSH $ra
+	sw	$ra, 0($sp)
+	move	$t1, $a0			# temporarily store
+	jal	shouldwrap_ver			# shouldwrap(string)
+	move	$a0, $t1			# restore
+	lw	$ra, 0($sp)
+	addiu	$sp, $sp, 4			# POP $ra
+	bnez	$v0, contain_ver_wrap
+	add	$a0, $a0, $s7			# string += grid_num_cols;
+	j	contain_ver_finloop		# finish off the loop iteration
+contain_ver_wrap:
+	addi	$t1, $s6, -1			# $t1 = grid_num_rows - 1
+	mult	$t1, $s7			# lo = (grid_num_rows - 1) * grid_num_cols
+	mflo	$t1
+	sub	$a0, $a0, $t1			# string -= lo
+contain_ver_finloop:
 	addi	$a1, $a1, 1			# word++;
 	j	contain_ver_wl			# while(1)
 
@@ -336,19 +349,45 @@ contain_ver_wl:
 # 	0 otherwise
 # $t0 = *string
 # $t1 = *word
+# $t7 = diff
+# $t8 = row
+# $t9 = col
 contain_dia:
+	la	$t7, grid
+	sub	$t7, $a0, $t7			# int diff = string - grid
+	div	$t7, $s7			# diff / grid_num_cols
+	mflo	$t8				# row = ...
+	mfhi	$t9				# col = ...
 contain_dia_wl:
 	lb	$t0, 0($a0)			# $t0 = *string
 	lb	$t1, 0($a1)			# $t1 = *word
 	bne	$t0, $t1, contain_r		# if(*string != *word)
-	addi	$t3, $s7, 2			# $t3 = grid_num_cols + 2;
-	add	$a0, $a0, $t3			# string += grid_num_cols + 2;
-	addi	$a1, $a1, 1			# word++;
-	# see C code for explanation of the following
-	lb	$t0, 0($a0)			# $t0 = *string
-	lb	$t1, 0($a1)			# $t1 = *word
-	addi	$t2, $0, 10			# $t2 = '\n'
-	beq	$t0, $t2, contain_r		# if(*string == '\n')
+	subiu	$sp, $sp, 4			# PUSH $ra
+	sw	$ra, 0($sp)
+	move	$t1, $a0			# temporarily store
+	jal	shouldwrap_dia			# shouldwrap(string)
+	move	$a0, $t1			# restore
+	lw	$ra, 0($sp)
+	addiu	$sp, $sp, 4			# POP $ra
+	bnez	$v0, contain_dia_wrap
+	add	$a0, $a0, $s7
+	addi	$a0, $a0, 1			# string += grid_num_cols + 1
+	addi	$t8, $t8, 1			# row++;
+	addi	$t9, $t9, 1			# col++;
+	j	contain_dia_finloop		# finish off the iteration
+contain_dia_wrap:
+contain_dia_wrap_wl:
+	sgt	$t0, $t8, 0			# row > 0
+	sgt	$t1, $t9, 0			# col > 0
+	and	$t0, $t0, $t1			# row > 0 && col > 0
+	beqz	$t0, contain_dia_finloop	# break loop & finish main iteration
+	sub	$a0, $a0, $s7
+	subi	$a0, $a0, 1			# string -= grid_num_cols + 1
+	subi	$t8, $t8, 1			# row--;
+	subi	$t9, $t9, 1			# col--;
+	j	contain_dia_wrap_wl		# }
+contain_dia_finloop:
+	addi	$a1, $a1, 1			# word++; // +1, because char *
 	j	contain_dia_wl			# while(1)
 
 # FUNCTION: void print_match(int row, int col, char *word, char direction)
@@ -394,6 +433,86 @@ print_match_b:
 	li	$v0, 11				# PRINT CHAR
 	li	$a0, 10				# 10 = '\n'
 	syscall					# print_char('\n');
+	jr	$ra
+	
+	
+# pseudoFUNCTION: int shouldwrap_ver(char *string)
+# parameters
+# 	$a0 = char *	string
+# returns
+# 	1 if string points to a character in the final row
+#	0 otherwise
+# $s0 = '\n'
+# $s1 = '\0'
+# $s2 = string + 1
+shouldwrap_ver:
+	subiu	$sp, $sp, 16
+	sw	$s0, 12($sp)			# store caller's $s0
+	sw	$s1, 8($sp)			# store caller's $s1
+	sw	$s2, 4($sp)			# store caller's $s2
+	sw	$s3, 0($sp)			# store caller's $s3
+	
+	addi	$s0, $0, 10			# $t0 = '\n'
+	addi	$s1, $0, 0			# $t0 = '\0'
+shouldwrap_ver_wl:
+	lb	$s3, 0($a0)			# $s3 = *string
+	beq	$s3, $s0, shouldwrap_ver_ret	# if(*string == '\n')
+	addi	$a0, $a0, 1			# string++
+	j	shouldwrap_ver_wl		# while(*string != '\n')
+shouldwrap_ver_ret:
+	addi	$a0, $a0, 1			# string++
+	lb	$s3, 0($a0)			# *string
+	seq	$v0, $s3, $s1
+	lw	$s3, 0($sp)
+	lw	$s2, 4($sp)
+	lw	$s1, 8($sp)
+	lw	$s0, 12($sp)
+	addiu	$sp, $sp, 16
+	jr	$ra
+	
+# pseudoFUNCTION: int shouldwrap_dia(char *string)
+# parameters
+# 	$a0 = char *	string
+# returns
+# 	1 if string points to a character in the final column or row
+#	0 otherwise
+# $s0 = '\n'
+# $s1 = '\0'
+# $s2 = string + 1
+shouldwrap_dia:
+	subiu	$sp, $sp, 16
+	sw	$s0, 12($sp)			# store caller's $s0
+	sw	$s1, 8($sp)			# store caller's $s1
+	sw	$s2, 4($sp)			# store caller's $s2
+	sw	$s3, 0($sp)			# store caller's $s3
+	
+	addi	$s0, $0, 10			# $t0 = '\n'
+	addi	$s1, $0, 0			# $t0 = '\0'
+	addi	$s2, $a0, 1			# (string + 1) NB +1, because char *
+	lb	$s2, 0($s2)			# $s2 = *(string + 1)
+	beq	$s2, $s0, shouldwrap_dia_ret1	# if(*(string + 1) == '\n')
+shouldwrap_dia_wl:
+	lb	$s3, 0($a0)			# $s3 = *string
+	beq	$s3, $s0, shouldwrap_dia_ret	# if(*string == '\n')
+	addi	$a0, $a0, 1			# string++
+	j	shouldwrap_dia_wl		# while(*string != '\n')
+shouldwrap_dia_ret:
+	addi	$a0, $a0, 1			# string++
+	lb	$s3, 0($a0)			# *string
+	seq	$v0, $s3, $s1
+	lw	$s3, 0($sp)
+	lw	$s2, 4($sp)
+	lw	$s1, 8($sp)
+	lw	$s0, 12($sp)
+	addiu	$sp, $sp, 16
+	jr	$ra
+shouldwrap_dia_ret1:
+	lw	$s3, 0($sp)
+	lw	$s2, 4($sp)
+	lw	$s1, 8($sp)
+	lw	$s0, 12($sp)
+	addiu	$sp, $sp, 16
+	addi	$v0, $0, 1
 	jr	$ra
 
 #----------------------------------------------------------------
