@@ -82,12 +82,22 @@ void print_match(int row, int col, char *word, char direction)
   print_char('\n');
 }
 
+int lastrow(char *string) // returns true if row == 0
+{
+  while (*string++ != '\n')
+    ;
+  return *string == '\0'; // true if final row
+}
+
 int contain_hor(char *string, char *word)
 {
   while (1)
   {
     if (*string != *word)
       return *word == '\n';
+    // characters are equal
+    if (*string == '\n')
+      return 1;
     string++; // 1 right, 0 down
     word++;
     // after this increment, we may have run into the following:
@@ -117,8 +127,10 @@ int contain_dia(char *string, char *word)
   {
     if (*string != *word)
       return *word == '\n';
-    string += grid_num_cols + 2; // 1 right, 1 down
     word++;
+    if (lastrow(string))
+      return *word == '\n';
+    string += grid_num_cols + 2; // 1 right, 1 down
     // after this increment, we may have run into the following:
     //     [h] X  \n
     //      X [i] \n

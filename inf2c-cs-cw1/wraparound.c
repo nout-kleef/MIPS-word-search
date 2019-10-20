@@ -82,7 +82,14 @@ void print_match(int row, int col, char *word, char direction)
   print_char('\n');
 }
 
-int shouldwrap(char *string) // returns true if row or col == 0
+int shouldwrap_ver(char *string) // returns true if last row
+{
+  while (*string++ != '\n')
+    ;
+  return *string == '\0'; // true if final row
+}
+
+int shouldwrap_dia(char *string) // returns true if last row or col
 {
   if (*(string + 1) == '\n')
     return 1; // final column
@@ -104,6 +111,8 @@ int contain_hor(char *string, char *word)
     }
     else
     {
+      if (*string == '\n')
+        return 1;
       string++; // 1 right, 0 down
       word++;
     }
@@ -116,7 +125,7 @@ int contain_ver(char *string, char *word)
   {
     if (*string != *word)
       return *word == '\n';
-    if (shouldwrap(string)) // might introduce a bug if *string == '\n'
+    if (shouldwrap_ver(string))
       string -= (grid_num_rows - 1) * grid_num_cols;
     else
       string += grid_num_cols;
@@ -134,7 +143,7 @@ int contain_dia(char *string, char *word)
   {
     if (*string != *word)
       return *word == '\n';
-    if (shouldwrap(string)) // wraparound
+    if (shouldwrap_dia(string)) // wraparound
     {
       while (row > 0 && col > 0)
       {                              // not in starting position yet
