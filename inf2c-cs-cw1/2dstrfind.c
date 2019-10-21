@@ -116,8 +116,10 @@ int contain_ver(char *string, char *word)
   {
     if (*string != *word)
       return *word == '\n';
-    string += grid_num_cols + 1; // 0 right, 1 down
     word++;
+    if (lastrow(string))
+      return *word == '\n';
+    string += grid_num_cols + 1; // 0 right, 1 down
   }
 }
 
