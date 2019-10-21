@@ -293,6 +293,7 @@ contain_hor_wl:
 	lb	$t0, 0($a0)			# $t0 = *string
 	lb	$t1, 0($a1)			# $t1 = *word
 	bne	$t0, $t1, contain_hor_eqLF	# if(*string != *word)
+	beq	$t0, 10, contain_ret1		# if(*string == '\n') // could just as well have been *word
 	addi	$a0, $a0, 1			# string++;
 	addi	$a1, $a1, 1			# word++;
 	j	contain_hor_wl			# while(1)
@@ -305,6 +306,9 @@ contain_hor_eqLF:
 	sub	$a0, $a0, $s7			# vvv
 	addi	$a0, $a0, 1			# string -= (grid_num_cols - 1);
 	j	contain_hor_wl			# while(1)
+contain_ret1:
+	addi	$v0, $0, 1			# 1;
+	jr	$ra				# return
 
 # FUNCTION: int contain_ver(char *string, char *word)
 # parameters
@@ -436,7 +440,7 @@ print_match_b:
 	jr	$ra
 	
 	
-# pseudoFUNCTION: int shouldwrap_ver(char *string)
+# FUNCTION: int shouldwrap_ver(char *string)
 # parameters
 # 	$a0 = char *	string
 # returns
@@ -446,7 +450,8 @@ print_match_b:
 # $s1 = '\0'
 # $s2 = string + 1
 shouldwrap_ver:
-	subiu	$sp, $sp, 16
+	subiu	$sp, $sp, 20
+	sw	$a0, 16($sp)			# store string pointer
 	sw	$s0, 12($sp)			# store caller's $s0
 	sw	$s1, 8($sp)			# store caller's $s1
 	sw	$s2, 4($sp)			# store caller's $s2
@@ -467,10 +472,11 @@ shouldwrap_ver_ret:
 	lw	$s2, 4($sp)
 	lw	$s1, 8($sp)
 	lw	$s0, 12($sp)
-	addiu	$sp, $sp, 16
+	lw	$a0, 16($sp)			# restore string pointer
+	addiu	$sp, $sp, 20
 	jr	$ra
 	
-# pseudoFUNCTION: int shouldwrap_dia(char *string)
+# FUNCTION: int shouldwrap_dia(char *string)
 # parameters
 # 	$a0 = char *	string
 # returns
@@ -480,7 +486,8 @@ shouldwrap_ver_ret:
 # $s1 = '\0'
 # $s2 = string + 1
 shouldwrap_dia:
-	subiu	$sp, $sp, 16
+	subiu	$sp, $sp, 20
+	sw	$a0, 16($sp)			# store string pointer
 	sw	$s0, 12($sp)			# store caller's $s0
 	sw	$s1, 8($sp)			# store caller's $s1
 	sw	$s2, 4($sp)			# store caller's $s2
@@ -504,14 +511,16 @@ shouldwrap_dia_ret:
 	lw	$s2, 4($sp)
 	lw	$s1, 8($sp)
 	lw	$s0, 12($sp)
-	addiu	$sp, $sp, 16
+	lw	$a0, 16($sp)			# restore string pointer
+	addiu	$sp, $sp, 20
 	jr	$ra
 shouldwrap_dia_ret1:
 	lw	$s3, 0($sp)
 	lw	$s2, 4($sp)
 	lw	$s1, 8($sp)
 	lw	$s0, 12($sp)
-	addiu	$sp, $sp, 16
+	lw	$a0, 16($sp)			# restore string pointer
+	addiu	$sp, $sp, 20
 	addi	$v0, $0, 1
 	jr	$ra
 

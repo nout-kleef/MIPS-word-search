@@ -293,6 +293,7 @@ contain_hor_wl:
 	lb	$t0, 0($a0)			# $t0 = *string
 	lb	$t1, 0($a1)			# $t1 = *word
 	bne	$t0, $t1, contain_r		# if(*string != *word)
+	beq	$t0, 10, contain_ret1		# if(*string == '\n') // could just as well have been *word
 	addi	$a0, $a0, 1			# string++;
 	addi	$a1, $a1, 1			# word++;
 	# see C code for explanation of the following
@@ -305,6 +306,9 @@ contain_r:					# $t1 is still *word
 	addi	$t0, $0, 10			# $t0 = '\n'
 	seq	$v0, $t1, $t0			# "return" = *word == '\n'
 	jr	$ra
+contain_ret1:
+	addi	$v0, $0, 1			# 1;
+	jr	$ra				# return
 	
 # FUNCTION: int contain_ver(char *string, char *word)
 # parameters
@@ -341,9 +345,16 @@ contain_dia_wl:
 	lb	$t0, 0($a0)			# $t0 = *string
 	lb	$t1, 0($a1)			# $t1 = *word
 	bne	$t0, $t1, contain_r		# if(*string != *word)
+	addi	$a1, $a1, 1			# word++;
+	# check if we're on the last row.
+	subiu	$sp, $sp, 4
+	sw	$ra, 0($sp)
+	jal	lastrow
+	lw	$ra, 0($sp)
+	addiu	$sp, $sp, 4
+	beq	$v0, $0, contain_r
 	addi	$t3, $s7, 2			# $t3 = grid_num_cols + 2;
 	add	$a0, $a0, $t3			# string += grid_num_cols + 2;
-	addi	$a1, $a1, 1			# word++;
 	# see C code for explanation of the following
 	lb	$t0, 0($a0)			# $t0 = *string
 	lb	$t1, 0($a1)			# $t1 = *word
@@ -394,6 +405,42 @@ print_match_b:
 	li	$v0, 11				# PRINT CHAR
 	li	$a0, 10				# 10 = '\n'
 	syscall					# print_char('\n');
+	jr	$ra
+	
+# FUNCTION int lastrow(char * string)
+# parameters
+# 	$ao = char *	string
+# returns
+# 	1 if string points to a character on the final line
+# 	0 otherwise
+# $s0 = '\n'
+# $s1 = '\0'
+# $s2 = string + 1
+lastrow:
+	subiu	$sp, $sp, 20
+	sw	$a0, 16($sp)			# store string pointer
+	sw	$s0, 12($sp)			# store caller's $s0
+	sw	$s1, 8($sp)			# store caller's $s1
+	sw	$s2, 4($sp)			# store caller's $s2
+	sw	$s3, 0($sp)			# store caller's $s3
+	
+	addi	$s0, $0, 10			# $t0 = '\n'
+	addi	$s1, $0, 0			# $t0 = '\0'
+lastrow_wl:
+	lb	$s3, 0($a0)			# $s3 = *string
+	beq	$s3, $s0, lastrow_ret	# if(*string == '\n')
+	addi	$a0, $a0, 1			# string++
+	j	lastrow_wl		# while(*string != '\n')
+lastrow_ret:
+	addi	$a0, $a0, 1			# string++
+	lb	$s3, 0($a0)			# *string
+	seq	$v0, $s3, $s1
+	lw	$s3, 0($sp)
+	lw	$s2, 4($sp)
+	lw	$s1, 8($sp)
+	lw	$s0, 12($sp)
+	lw	$a0, 16($sp)			# restore string pointer
+	addiu	$sp, $sp, 20
 	jr	$ra
 
 #----------------------------------------------------------------
