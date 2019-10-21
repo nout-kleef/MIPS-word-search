@@ -326,9 +326,17 @@ contain_ver_wl:
 	lb	$t1, 0($a1)			# $t1 = *word
 	# NB: contain_r is "part of" contain_hor, but it contains the same instructions
 	bne	$t0, $t1, contain_r		# this is the same for contain_hor
+	addi	$a1, $a1, 1			# word++;
+	# check if we're on the last row.
+	subiu	$sp, $sp, 4
+	sw	$ra, 0($sp)
+	jal	lastrow				# $v0 = lastrow(string)
+	lw	$ra, 0($sp)
+	addiu	$sp, $sp, 4
+	lb	$t1, 0($a1)			# $t1 = *word
+	bne	$v0, $0, contain_r		# if(lastrow(string)
 	addi	$t3, $s7, 1			# $t3 = grid_num_cols + 1;
 	add	$a0, $a0, $t3			# string += grid_num_cols + 1;
-	addi	$a1, $a1, 1			# word++;
 	j	contain_ver_wl			# while(1)
 	
 # FUNCTION: int contain_dia(char *string, char *word)
@@ -349,10 +357,11 @@ contain_dia_wl:
 	# check if we're on the last row.
 	subiu	$sp, $sp, 4
 	sw	$ra, 0($sp)
-	jal	lastrow
+	jal	lastrow				# $v0 = lastrow(string)
 	lw	$ra, 0($sp)
 	addiu	$sp, $sp, 4
-	beq	$v0, $0, contain_r
+	lb	$t1, 0($a1)			# $t1 = *word
+	bne	$v0, $0, contain_r		# if(lastrow(string)
 	addi	$t3, $s7, 2			# $t3 = grid_num_cols + 2;
 	add	$a0, $a0, $t3			# string += grid_num_cols + 2;
 	# see C code for explanation of the following
