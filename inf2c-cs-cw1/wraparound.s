@@ -20,7 +20,6 @@
 
 grid_file_name:         .asciiz  "2dgrid.txt"
 dictionary_file_name:   .asciiz  "dictionary.txt"
-newline:                .asciiz  "\n"
 
 #-------------------------------------------------------------------------
 # Global variables in memory
@@ -438,8 +437,8 @@ print_match_b:
 	li	$a0, 10				# 10 = '\n'
 	syscall					# print_char('\n');
 	jr	$ra
-	
-	
+
+
 # FUNCTION: int shouldwrap_ver(char *string)
 # parameters
 # 	$a0 = char *	string
@@ -456,7 +455,7 @@ shouldwrap_ver:
 	sw	$s1, 8($sp)			# store caller's $s1
 	sw	$s2, 4($sp)			# store caller's $s2
 	sw	$s3, 0($sp)			# store caller's $s3
-	
+
 	addi	$s0, $0, 10			# $t0 = '\n'
 	addi	$s1, $0, 0			# $t0 = '\0'
 shouldwrap_ver_wl:
@@ -475,7 +474,7 @@ shouldwrap_ver_ret:
 	lw	$a0, 16($sp)			# restore string pointer
 	addiu	$sp, $sp, 20
 	jr	$ra
-	
+
 # FUNCTION: int shouldwrap_dia(char *string)
 # parameters
 # 	$a0 = char *	string
@@ -492,7 +491,7 @@ shouldwrap_dia:
 	sw	$s1, 8($sp)			# store caller's $s1
 	sw	$s2, 4($sp)			# store caller's $s2
 	sw	$s3, 0($sp)			# store caller's $s3
-	
+
 	addi	$s0, $0, 10			# $t0 = '\n'
 	addi	$s1, $0, 0			# $t0 = '\0'
 	addi	$s2, $a0, 1			# (string + 1) NB +1, because char *

@@ -1,14 +1,14 @@
 
 #=========================================================================
-# 2D String Finder 
+# 2D String Finder
 #=========================================================================
 # Finds the matching words from dictionary in the 2D grid
-# 
+#
 # Inf2C Computer Systems
-# 
+#
 # Siavash Katebzadeh
 # 8 Oct 2019
-# 
+#
 #
 #=========================================================================
 # DATA SEGMENT
@@ -20,12 +20,11 @@
 
 grid_file_name:         .asciiz  "2dgrid.txt"
 dictionary_file_name:   .asciiz  "dictionary.txt"
-newline:                .asciiz  "\n"
-        
+
 #-------------------------------------------------------------------------
 # Global variables in memory
 #-------------------------------------------------------------------------
-# 
+#
 grid:                   .space 	1057     # Maximun size of 2D grid_file + NULL (((32 + 1) * 32) + 1)
 .align 4                                # The next field will be aligned
 dictionary:             .space 	11001    # Maximum number of words in dictionary *
@@ -35,7 +34,7 @@ dictionary_idx:		.word	0:1000	# [0, 0, ...]
 no_match:		.asciiz	"-1\n"
 
 #=========================================================================
-# TEXT SEGMENT  
+# TEXT SEGMENT
 #=========================================================================
 .text
 
@@ -57,8 +56,8 @@ main:
         li   $a1, 0                     # flag for reading
         li   $a2, 0                     # mode is ignored
         syscall                         # open a file
-        
-        move $s0, $v0                   # save the file descriptor 
+
+        move $s0, $v0                   # save the file descriptor
 
         # reading from file just opened
 
@@ -73,11 +72,11 @@ READ_LOOP:                              # do {
         syscall                         # c_input = fgetc(grid_file);
         blez $v0, END_LOOP              # if(feof(grid_file)) { break }
         addi $t0, $t0, 1                # idx += 1
-        j    READ_LOOP 
+        j    READ_LOOP
 END_LOOP:
         sb   $0,  grid($t0)            # grid[idx] = '\0'
 
-        # Close the file 
+        # Close the file
 
         li   $v0, 16                    # system call for close file
         move $a0, $s0                   # file descriptor to close
@@ -91,8 +90,8 @@ END_LOOP:
         li   $a1, 0                     # flag for reading
         li   $a2, 0                     # mode is ignored
         syscall                         # fopen(dictionary_file, "r")
-        
-        move $s0, $v0                   # save the file descriptor 
+
+        move $s0, $v0                   # save the file descriptor
 
         # reading from  file just opened
 
@@ -106,14 +105,14 @@ READ_LOOP2:                             # do {
         li   $a2,  1                    # read 1 char
         syscall                         # c_input = fgetc(dictionary_file);
         blez $v0, END_LOOP2             # if(feof(dictionary_file)) { break }
-        lb   $t1, dictionary($t0)                             
+        lb   $t1, dictionary($t0)
         beq  $t1, $0,  END_LOOP2        # if(c_input == '\0')
         addi $t0, $t0, 1                # idx += 1
         j    READ_LOOP2
 END_LOOP2:
         sb   $0,  dictionary($t0)       # dictionary[idx] = '\0'
 
-        # Close the file 
+        # Close the file
 
         li   $v0, 16                    # system call for close file
         move $a0, $s0                   # file descriptor to close
@@ -129,7 +128,7 @@ END_LOOP2:
 # $s1 = int dict_num_words
 # $s6 = int grid_num_rows
 # $s7 = int grid_num_cols
- 
+
 # $s2 = int	idx
 # $t1 = int	c_input
 # $t2 = int	start_idx
@@ -177,11 +176,11 @@ store_idx_LF:						# char is '\n'
 store_idx_end:						# break
 	move	$s1, $t3				# dict_num_words = dict_idx;
 	jal	strfind					# strfind();
- 
+
 #------------------------------------------------------------------
 # Exit, DO NOT MODIFY THIS BLOCK
 #------------------------------------------------------------------
-main_end:      
+main_end:
         li   $v0, 10          # exit()
         syscall
 
@@ -278,7 +277,7 @@ strfind_return:
 	lw	$ra, 16($sp)
 	addiu	$sp, $sp, 20
 	jr	$ra
-	
+
 # FUNCTION: int contain_hor(char *string, char *word)
 # parameters
 #	$a0 = char *	string
@@ -309,7 +308,7 @@ contain_r:					# $t1 is still *word
 contain_ret1:
 	addi	$v0, $0, 1			# 1;
 	jr	$ra				# return
-	
+
 # FUNCTION: int contain_ver(char *string, char *word)
 # parameters
 # 	$a0 = char *	string
@@ -338,7 +337,7 @@ contain_ver_wl:
 	addi	$t3, $s7, 1			# $t3 = grid_num_cols + 1;
 	add	$a0, $a0, $t3			# string += grid_num_cols + 1;
 	j	contain_ver_wl			# while(1)
-	
+
 # FUNCTION: int contain_dia(char *string, char *word)
 # parameters
 #	$a0 = char *	string
@@ -370,7 +369,7 @@ contain_dia_wl:
 	addi	$t2, $0, 10			# $t2 = '\n'
 	beq	$t0, $t2, contain_r		# if(*string == '\n')
 	j	contain_dia_wl			# while(1)
-	
+
 # FUNCTION: void print_match(int row, int col, char *word, char direction)
 # parameters
 # 	$a0 = int	row
@@ -381,23 +380,23 @@ print_match:
 	li	$v0, 1				# PRINT INT
 	# move	$a0, $a0			# $a0 already holds row
 	syscall					# print_int(row);
-	
+
 	li	$v0, 11				# PRINT CHAR
 	li	$a0, 0x2c			# 0x2c = ','
 	syscall					# print_char(',');
-	
+
 	li	$v0, 1				# PRINT INT
 	move	$a0, $a1			# $a0 = col
 	syscall					# print_int(col);
-	
+
 	li	$v0, 11				# PRINT CHAR
 	li	$a0, 0x20			# 0x20 = ' '
 	syscall					# print_char(' ');
-	
+
 	li	$v0, 11				# PRINT CHAR
 	move	$a0, $a3			# $a0 = direction
 	syscall					# print_char(direction);
-	
+
 	li	$v0, 11				# PRINT CHAR
 	li	$a0, 0x20			# 0x20 = ' '
 	syscall					# print_char(' ');
@@ -405,7 +404,7 @@ print_match_l:
 	lb	$a0, 0($a2)			# current character
 	beq	$a0, 10, print_match_b		# *word == '\n'
 	beq	$a0, 0, print_match_b		# *word == '\0'
-	
+
 	li	$v0, 11				# PRINT CHAR
 	syscall					# print current character
 	addi	$a2, $a2, 1			# point to next character
@@ -415,7 +414,7 @@ print_match_b:
 	li	$a0, 10				# 10 = '\n'
 	syscall					# print_char('\n');
 	jr	$ra
-	
+
 # FUNCTION int lastrow(char * string)
 # parameters
 # 	$ao = char *	string
@@ -432,7 +431,7 @@ lastrow:
 	sw	$s1, 8($sp)			# store caller's $s1
 	sw	$s2, 4($sp)			# store caller's $s2
 	sw	$s3, 0($sp)			# store caller's $s3
-	
+
 	addi	$s0, $0, 10			# $t0 = '\n'
 	addi	$s1, $0, 0			# $t0 = '\0'
 lastrow_wl:
