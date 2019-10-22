@@ -135,47 +135,47 @@ END_LOOP2:
 # $t3 = int	dict_idx
 # $t4 = char *	c
 # $t5 = char	*c
-	move	$s1, $0					# dict_num_words = 0;
-	move	$s6, $0					# grid_num_rows = 0;
-	move	$s7, $0					# grid_num_cols = 0;
-	move	$s2, $0					# idx = 0;
-	move	$t2, $0					# start_idx = 0;
-	move	$t3, $0					# dict_idx = 0;
+    move	$s1, $0					# dict_num_words = 0;
+    move	$s6, $0					# grid_num_rows = 0;
+    move	$s7, $0					# grid_num_cols = 0;
+    move	$s2, $0					# idx = 0;
+    move	$t2, $0					# start_idx = 0;
+    move	$t3, $0					# dict_idx = 0;
 # computing the actual dimensions of the grid, post file-reading
-	la	$t4, grid				# char *c = grid
+    la	$t4, grid				# char *c = grid
 comp_dims_wl_EOF:
-	lb	$t5, 0($t4)				# $t5 = *c
-	beq	$t5, $0, comp_dims_wb_EOF		# while(*c != '\0') {
-	addi	$s7, $0, 1				# grid_num_cols = 1;
-	addi	$s6, $s6, 1				# grid_num_rows++;
+    lb	$t5, 0($t4)				# $t5 = *c
+    beq	$t5, $0, comp_dims_wb_EOF		# while(*c != '\0') {
+    addi	$s7, $0, 1				# grid_num_cols = 1;
+    addi	$s6, $s6, 1				# grid_num_rows++;
 comp_dims_wl_LF:
-	lb	$t5, 0($t4)				# $t5 = *c
-	beq	$t5, 10, comp_dims_wb_LF		# while(*c != '\n') {
-	addi	$t4, $t4, 1				# c++; NB: +1, because char *
-	addi	$s7, $s7, 1				# grid_num_cols++;
-	j	comp_dims_wl_LF				# }
+    lb	$t5, 0($t4)				# $t5 = *c
+    beq	$t5, 10, comp_dims_wb_LF		# while(*c != '\n') {
+    addi	$t4, $t4, 1				# c++; NB: +1, because char *
+    addi	$s7, $s7, 1				# grid_num_cols++;
+    j	comp_dims_wl_LF				# }
 comp_dims_wb_LF:
-	addi	$t4, $t4, 1				# c++;
-	j	comp_dims_wl_EOF			# }
+    addi	$t4, $t4, 1				# c++;
+    j	comp_dims_wl_EOF			# }
 comp_dims_wb_EOF: # distinct label added for robustness
-	# nop
+    # nop
 # storing the starting index of each word in the dictorionary in dictionary_idx
 store_idx_loop:						# do {
-	lb	$t1, dictionary($s2)			# c_input = dictionary[idx];
-	beq	$t1, $0, store_idx_end			# if(c_input == '\0')
-	addi	$v0, $0, 10				# $v0 = '\n'
-	beq	$t1, $v0, store_idx_LF			# if(c_input == '\n')
+    lb	$t1, dictionary($s2)			# c_input = dictionary[idx];
+    beq	$t1, $0, store_idx_end			# if(c_input == '\0')
+    addi	$v0, $0, 10				# $v0 = '\n'
+    beq	$t1, $v0, store_idx_LF			# if(c_input == '\n')
 store_idx_inc:
-	addi	$s2, $s2, 1				# idx += 1;
-	j	store_idx_loop				# } while(1)
+    addi	$s2, $s2, 1				# idx += 1;
+    j	store_idx_loop				# } while(1)
 store_idx_LF:						# char is '\n'
-	sw	$t2, dictionary_idx($t3)		# dictionary_idx[dict_idx] = start_idx
-	addi	$t3, $t3, 4				# dict_idx++
-	addi	$t2, $s2, 1				# start_idx = idx + 1
-	j	store_idx_inc
+    sw	$t2, dictionary_idx($t3)		# dictionary_idx[dict_idx] = start_idx
+    addi	$t3, $t3, 4				# dict_idx++
+    addi	$t2, $s2, 1				# start_idx = idx + 1
+    j	store_idx_inc
 store_idx_end:						# break
-	move	$s1, $t3				# dict_num_words = dict_idx;
-	jal	strfind					# strfind();
+    move	$s1, $t3				# dict_num_words = dict_idx;
+    jal	strfind					# strfind();
 
 #------------------------------------------------------------------
 # Exit, DO NOT MODIFY THIS BLOCK
@@ -192,91 +192,91 @@ main_end:
 # $s5 = int	ycoord
 # $t5 = char *	word
 strfind:
-	addiu	$sp, $sp, -20
-	sw	$ra, 16($sp)			# store $ra
-	sw	$s2, 12($sp)			# store caller's $s2
-	sw	$s3, 8($sp)			# store caller's $s3
-	sw	$s4, 4($sp)			# store caller's $s4
-	sw	$s5, 0($sp)			# store caller's $s5
-	move	$s3, $0				# wordfound = 0;
-	move	$s2, $0				# idx = 0;
-	move	$t4, $0				# grid_idx = 0;
-	move	$s4, $0				# xcoord = 0;
-	move	$s5, $0				# ycoord = 0;
+    addiu	$sp, $sp, -20
+    sw	$ra, 16($sp)			# store $ra
+    sw	$s2, 12($sp)			# store caller's $s2
+    sw	$s3, 8($sp)			# store caller's $s3
+    sw	$s4, 4($sp)			# store caller's $s4
+    sw	$s5, 0($sp)			# store caller's $s5
+    move	$s3, $0				# wordfound = 0;
+    move	$s2, $0				# idx = 0;
+    move	$t4, $0				# grid_idx = 0;
+    move	$s4, $0				# xcoord = 0;
+    move	$s5, $0				# ycoord = 0;
 strfind_wl_EOF:
-	lb	$t1, grid($t4)			# $t1 = grid[grid_idx]
-	beq	$t1, $0, strfind_wb_EOF		# while($t1 != '\0') {
-	# this is where we add the nested while loop
+    lb	$t1, grid($t4)			# $t1 = grid[grid_idx]
+    beq	$t1, $0, strfind_wb_EOF		# while($t1 != '\0') {
+    # this is where we add the nested while loop
 strfind_wl_LF:
-	lb	$t1, grid($t4)			# $t1 = grid[grid_idx];
-	beq	$t1, 10, strfind_wb_LF		# while($t1 != '\n')
-	move	$s2, $0				# for(idx = 0;
-	# this is where we add the nested for loop
+    lb	$t1, grid($t4)			# $t1 = grid[grid_idx];
+    beq	$t1, 10, strfind_wb_LF		# while($t1 != '\n')
+    move	$s2, $0				# for(idx = 0;
+    # this is where we add the nested for loop
 strfind_fl:
-	bge	$s2, $s1, strfind_fb		# idx < dict_num_words;
-	lw	$t1, dictionary_idx($s2)	# $t1 = dictionary_idx[idx]
-	la	$t5, dictionary($t1)		# word = &dictionary[0] + $t1;
+    bge	$s2, $s1, strfind_fb		# idx < dict_num_words;
+    lw	$t1, dictionary_idx($s2)	# $t1 = dictionary_idx[idx]
+    la	$t5, dictionary($t1)		# word = &dictionary[0] + $t1;
 strfind_hor_check:
-	la	$a0, grid($t4)			# $a0 = &grid[0] + grid_idx
-	move	$a1, $t5			# $a1 = word
-	jal	contain_hor
-	beq	$v0, $0, strfind_ver_check	# !contain_hor(...)
-	# print the word that was found
-	move	$a0, $s5			# ycoord
-	move	$a1, $s4			# xcoord
-	move	$a2, $t5			# word
-	li	$a3, 0x48			# 'H'
-	jal	print_match			# print_match(ycoord, xcoord, word, 'H');
-	addi	$s3, $0, 1			# wordfound = 1;
+    la	$a0, grid($t4)			# $a0 = &grid[0] + grid_idx
+    move	$a1, $t5			# $a1 = word
+    jal	contain_hor
+    beq	$v0, $0, strfind_ver_check	# !contain_hor(...)
+    # print the word that was found
+    move	$a0, $s5			# ycoord
+    move	$a1, $s4			# xcoord
+    move	$a2, $t5			# word
+    li	$a3, 0x48			# 'H'
+    jal	print_match			# print_match(ycoord, xcoord, word, 'H');
+    addi	$s3, $0, 1			# wordfound = 1;
 strfind_ver_check:
-	la	$a0, grid($t4)			# $a0 = &grid[0] + grid_idx
-	move	$a1, $t5			# $a1 = word
-	jal	contain_ver
-	beq	$v0, $0, strfind_dia_check	# !contain_ver(...)
-	# print the word that was found
-	move	$a0, $s5			# ycoord
-	move	$a1, $s4			# xcoord
-	move	$a2, $t5			# word
-	li	$a3, 0x56			# 'H'
-	jal	print_match			# print_match(ycoord, xcoord, word, 'V');
-	addi	$s3, $0, 1			# wordfound = 1;
+    la	$a0, grid($t4)			# $a0 = &grid[0] + grid_idx
+    move	$a1, $t5			# $a1 = word
+    jal	contain_ver
+    beq	$v0, $0, strfind_dia_check	# !contain_ver(...)
+    # print the word that was found
+    move	$a0, $s5			# ycoord
+    move	$a1, $s4			# xcoord
+    move	$a2, $t5			# word
+    li	$a3, 0x56			# 'H'
+    jal	print_match			# print_match(ycoord, xcoord, word, 'V');
+    addi	$s3, $0, 1			# wordfound = 1;
 strfind_dia_check:
-	la	$a0, grid($t4)			# $a0 = &grid[0] + grid_idx
-	move	$a1, $t5			# $a1 = word
-	jal	contain_dia
-	beq	$v0, $0, strfind_fc		# !contain_dia(...)
-	# print the word that was found
-	move	$a0, $s5			# ycoord
-	move	$a1, $s4			# xcoord
-	move	$a2, $t5			# word
-	li	$a3, 0x44			# 'D'
-	jal	print_match			# print_match(ycoord, xcoord, word, 'D');
-	addi	$s3, $0, 1			# wordfound = 1;
+    la	$a0, grid($t4)			# $a0 = &grid[0] + grid_idx
+    move	$a1, $t5			# $a1 = word
+    jal	contain_dia
+    beq	$v0, $0, strfind_fc		# !contain_dia(...)
+    # print the word that was found
+    move	$a0, $s5			# ycoord
+    move	$a1, $s4			# xcoord
+    move	$a2, $t5			# word
+    li	$a3, 0x44			# 'D'
+    jal	print_match			# print_match(ycoord, xcoord, word, 'D');
+    addi	$s3, $0, 1			# wordfound = 1;
 strfind_fc:
-	addi	$s2, $s2, 4			# idx++
-	j	strfind_fl			# }
+    addi	$s2, $s2, 4			# idx++
+    j	strfind_fl			# }
 strfind_fb:
-	addi	$t4, $t4, 1			# grid_idx++;
-	addi	$s4, $s4, 1			# xcoord++;
-	j	strfind_wl_LF			# }
+    addi	$t4, $t4, 1			# grid_idx++;
+    addi	$s4, $s4, 1			# xcoord++;
+    j	strfind_wl_LF			# }
 strfind_wb_LF:
-	addi	$t4, $t4, 1			# grid_idx++; // skip over '\n'
-	move	$s4, $0				# xcoord = 0;
-	addi	$s5, $s5, 1			# ycoord++;
-	j	strfind_wl_EOF			# }
+    addi	$t4, $t4, 1			# grid_idx++; // skip over '\n'
+    move	$s4, $0				# xcoord = 0;
+    addi	$s5, $s5, 1			# ycoord++;
+    j	strfind_wl_EOF			# }
 strfind_wb_EOF:
-	bne	$s3, $0, strfind_return		# if(wordfound) return;
-	li	$v0, 4
-	la	$a0, no_match
-	syscall					# print_string("-1\n");
+    bne	$s3, $0, strfind_return		# if(wordfound) return;
+    li	$v0, 4
+    la	$a0, no_match
+    syscall					# print_string("-1\n");
 strfind_return:
-	lw	$s5, 0($sp)			# restore caller's registers
-	lw	$s4, 4($sp)
-	lw	$s3, 8($sp)
-	lw	$s2, 12($sp)
-	lw	$ra, 16($sp)
-	addiu	$sp, $sp, 20
-	jr	$ra
+    lw	$s5, 0($sp)			# restore caller's registers
+    lw	$s4, 4($sp)
+    lw	$s3, 8($sp)
+    lw	$s2, 12($sp)
+    lw	$ra, 16($sp)
+    addiu	$sp, $sp, 20
+    jr	$ra
 
 # FUNCTION: int contain_hor(char *string, char *word)
 # parameters
@@ -289,25 +289,25 @@ strfind_return:
 # $t1 = *word
 contain_hor:
 contain_hor_wl:
-	lb	$t0, 0($a0)			# $t0 = *string
-	lb	$t1, 0($a1)			# $t1 = *word
-	bne	$t0, $t1, contain_hor_eqLF	# if(*string != *word)
-	beq	$t0, 10, contain_ret1		# if(*string == '\n') // could just as well have been *word
-	addi	$a0, $a0, 1			# string++;
-	addi	$a1, $a1, 1			# word++;
-	j	contain_hor_wl			# while(1)
+    lb	$t0, 0($a0)			# $t0 = *string
+    lb	$t1, 0($a1)			# $t1 = *word
+    bne	$t0, $t1, contain_hor_eqLF	# if(*string != *word)
+    beq	$t0, 10, contain_ret1		# if(*string == '\n') // could just as well have been *word
+    addi	$a0, $a0, 1			# string++;
+    addi	$a1, $a1, 1			# word++;
+    j	contain_hor_wl			# while(1)
 contain_r:					# $t1 is still *word
-	addi	$t0, $0, 10			# $t0 = '\n'
-	seq	$v0, $t1, $t0			# "return" = *word == '\n'
-	jr	$ra
+    addi	$t0, $0, 10			# $t0 = '\n'
+    seq	$v0, $t1, $t0			# "return" = *word == '\n'
+    jr	$ra
 contain_hor_eqLF:
-	bne	$t0, 10, contain_r		# if(*string != '\n')
-	sub	$a0, $a0, $s7			# vvv
-	addi	$a0, $a0, 1			# string -= (grid_num_cols - 1);
-	j	contain_hor_wl			# while(1)
+    bne	$t0, 10, contain_r		# if(*string != '\n')
+    sub	$a0, $a0, $s7			# vvv
+    addi	$a0, $a0, 1			# string -= (grid_num_cols - 1);
+    j	contain_hor_wl			# while(1)
 contain_ret1:
-	addi	$v0, $0, 1			# 1;
-	jr	$ra				# return
+    addi	$v0, $0, 1			# 1;
+    jr	$ra				# return
 
 # FUNCTION: int contain_ver(char *string, char *word)
 # parameters
@@ -320,28 +320,28 @@ contain_ret1:
 # $t1 = *word
 contain_ver:
 contain_ver_wl:
-	lb	$t0, 0($a0)			# $t0 = *string
-	lb	$t1, 0($a1)			# $t1 = *word
-	# NB: contain_r is "part of" contain_hor, but it contains the same instructions
-	bne	$t0, $t1, contain_r		# this is the same for contain_hor
-	addiu	$sp, $sp, -4			# PUSH $ra
-	sw	$ra, 0($sp)
-	move	$t1, $a0			# temporarily store
-	jal	shouldwrap_ver			# shouldwrap(string)
-	move	$a0, $t1			# restore
-	lw	$ra, 0($sp)
-	addiu	$sp, $sp, 4			# POP $ra
-	bnez	$v0, contain_ver_wrap
-	add	$a0, $a0, $s7			# string += grid_num_cols;
-	j	contain_ver_finloop		# finish off the loop iteration
+    lb	$t0, 0($a0)			# $t0 = *string
+    lb	$t1, 0($a1)			# $t1 = *word
+    # NB: contain_r is "part of" contain_hor, but it contains the same instructions
+    bne	$t0, $t1, contain_r		# this is the same for contain_hor
+    addiu	$sp, $sp, -4			# PUSH $ra
+    sw	$ra, 0($sp)
+    move	$t1, $a0			# temporarily store
+    jal	shouldwrap_ver			# shouldwrap(string)
+    move	$a0, $t1			# restore
+    lw	$ra, 0($sp)
+    addiu	$sp, $sp, 4			# POP $ra
+    bnez	$v0, contain_ver_wrap
+    add	$a0, $a0, $s7			# string += grid_num_cols;
+    j	contain_ver_finloop		# finish off the loop iteration
 contain_ver_wrap:
-	addi	$t1, $s6, -1			# $t1 = grid_num_rows - 1
-	mult	$t1, $s7			# lo = (grid_num_rows - 1) * grid_num_cols
-	mflo	$t1
-	sub	$a0, $a0, $t1			# string -= lo
+    addi	$t1, $s6, -1			# $t1 = grid_num_rows - 1
+    mult	$t1, $s7			# lo = (grid_num_rows - 1) * grid_num_cols
+    mflo	$t1
+    sub	$a0, $a0, $t1			# string -= lo
 contain_ver_finloop:
-	addi	$a1, $a1, 1			# word++;
-	j	contain_ver_wl			# while(1)
+    addi	$a1, $a1, 1			# word++;
+    j	contain_ver_wl			# while(1)
 
 # FUNCTION: int contain_dia(char *string, char *word)
 # parameters
@@ -356,42 +356,42 @@ contain_ver_finloop:
 # $t8 = row
 # $t9 = col
 contain_dia:
-	la	$t7, grid
-	sub	$t7, $a0, $t7			# int diff = string - grid
-	div	$t7, $s7			# diff / grid_num_cols
-	mflo	$t8				# row = ...
-	mfhi	$t9				# col = ...
+    la	$t7, grid
+    sub	$t7, $a0, $t7			# int diff = string - grid
+    div	$t7, $s7			# diff / grid_num_cols
+    mflo	$t8				# row = ...
+    mfhi	$t9				# col = ...
 contain_dia_wl:
-	lb	$t0, 0($a0)			# $t0 = *string
-	lb	$t1, 0($a1)			# $t1 = *word
-	bne	$t0, $t1, contain_r		# if(*string != *word)
-	addiu	$sp, $sp, -4			# PUSH $ra
-	sw	$ra, 0($sp)
-	move	$t1, $a0			# temporarily store
-	jal	shouldwrap_dia			# shouldwrap(string)
-	move	$a0, $t1			# restore
-	lw	$ra, 0($sp)
-	addiu	$sp, $sp, 4			# POP $ra
-	bnez	$v0, contain_dia_wrap
-	add	$a0, $a0, $s7
-	addi	$a0, $a0, 1			# string += grid_num_cols + 1
-	addi	$t8, $t8, 1			# row++;
-	addi	$t9, $t9, 1			# col++;
-	j	contain_dia_finloop		# finish off the iteration
+    lb	$t0, 0($a0)			# $t0 = *string
+    lb	$t1, 0($a1)			# $t1 = *word
+    bne	$t0, $t1, contain_r		# if(*string != *word)
+    addiu	$sp, $sp, -4			# PUSH $ra
+    sw	$ra, 0($sp)
+    move	$t1, $a0			# temporarily store
+    jal	shouldwrap_dia			# shouldwrap(string)
+    move	$a0, $t1			# restore
+    lw	$ra, 0($sp)
+    addiu	$sp, $sp, 4			# POP $ra
+    bnez	$v0, contain_dia_wrap
+    add	$a0, $a0, $s7
+    addi	$a0, $a0, 1			# string += grid_num_cols + 1
+    addi	$t8, $t8, 1			# row++;
+    addi	$t9, $t9, 1			# col++;
+    j	contain_dia_finloop		# finish off the iteration
 contain_dia_wrap:
 contain_dia_wrap_wl:
-	sgt	$t0, $t8, 0			# row > 0
-	sgt	$t1, $t9, 0			# col > 0
-	and	$t0, $t0, $t1			# row > 0 && col > 0
-	beqz	$t0, contain_dia_finloop	# break loop & finish main iteration
-	sub	$a0, $a0, $s7
-	addi	$a0, $a0, -1			# string -= grid_num_cols + 1
-	addi	$t8, $t8, -1			# row--;
-	addi	$t9, $t9, -1			# col--;
-	j	contain_dia_wrap_wl		# }
+    sgt	$t0, $t8, 0			# row > 0
+    sgt	$t1, $t9, 0			# col > 0
+    and	$t0, $t0, $t1			# row > 0 && col > 0
+    beqz	$t0, contain_dia_finloop	# break loop & finish main iteration
+    sub	$a0, $a0, $s7
+    addi	$a0, $a0, -1			# string -= grid_num_cols + 1
+    addi	$t8, $t8, -1			# row--;
+    addi	$t9, $t9, -1			# col--;
+    j	contain_dia_wrap_wl		# }
 contain_dia_finloop:
-	addi	$a1, $a1, 1			# word++; // +1, because char *
-	j	contain_dia_wl			# while(1)
+    addi	$a1, $a1, 1			# word++; // +1, because char *
+    j	contain_dia_wl			# while(1)
 
 # FUNCTION: void print_match(int row, int col, char *word, char direction)
 # parameters
@@ -400,43 +400,43 @@ contain_dia_finloop:
 #	$a2 = char *	word
 # 	$a3 = char	direction
 print_match:
-	li	$v0, 1				# PRINT INT
-	# move	$a0, $a0			# $a0 already holds row
-	syscall					# print_int(row);
+    li	$v0, 1				# PRINT INT
+    # move	$a0, $a0			# $a0 already holds row
+    syscall					# print_int(row);
 
-	li	$v0, 11				# PRINT CHAR
-	li	$a0, 0x2c			# 0x2c = ','
-	syscall					# print_char(',');
+    li	$v0, 11				# PRINT CHAR
+    li	$a0, 0x2c			# 0x2c = ','
+    syscall					# print_char(',');
 
-	li	$v0, 1				# PRINT INT
-	move	$a0, $a1			# $a0 = col
-	syscall					# print_int(col);
+    li	$v0, 1				# PRINT INT
+    move	$a0, $a1			# $a0 = col
+    syscall					# print_int(col);
 
-	li	$v0, 11				# PRINT CHAR
-	li	$a0, 0x20			# 0x20 = ' '
-	syscall					# print_char(' ');
+    li	$v0, 11				# PRINT CHAR
+    li	$a0, 0x20			# 0x20 = ' '
+    syscall					# print_char(' ');
 
-	li	$v0, 11				# PRINT CHAR
-	move	$a0, $a3			# $a0 = direction
-	syscall					# print_char(direction);
+    li	$v0, 11				# PRINT CHAR
+    move	$a0, $a3			# $a0 = direction
+    syscall					# print_char(direction);
 
-	li	$v0, 11				# PRINT CHAR
-	li	$a0, 0x20			# 0x20 = ' '
-	syscall					# print_char(' ');
+    li	$v0, 11				# PRINT CHAR
+    li	$a0, 0x20			# 0x20 = ' '
+    syscall					# print_char(' ');
 print_match_l:
-	lb	$a0, 0($a2)			# current character
-	beq	$a0, 10, print_match_b		# *word == '\n'
-	beq	$a0, 0, print_match_b		# *word == '\0'
+    lb	$a0, 0($a2)			# current character
+    beq	$a0, 10, print_match_b		# *word == '\n'
+    beq	$a0, 0, print_match_b		# *word == '\0'
 
-	li	$v0, 11				# PRINT CHAR
-	syscall					# print current character
-	addi	$a2, $a2, 1			# point to next character
-	j	print_match_l
+    li	$v0, 11				# PRINT CHAR
+    syscall					# print current character
+    addi	$a2, $a2, 1			# point to next character
+    j	print_match_l
 print_match_b:
-	li	$v0, 11				# PRINT CHAR
-	li	$a0, 10				# 10 = '\n'
-	syscall					# print_char('\n');
-	jr	$ra
+    li	$v0, 11				# PRINT CHAR
+    li	$a0, 10				# 10 = '\n'
+    syscall					# print_char('\n');
+    jr	$ra
 
 
 # FUNCTION: int shouldwrap_ver(char *string)
@@ -449,31 +449,31 @@ print_match_b:
 # $s1 = '\0'
 # $s2 = string + 1
 shouldwrap_ver:
-	addiu	$sp, $sp, -20
-	sw	$a0, 16($sp)			# store string pointer
-	sw	$s0, 12($sp)			# store caller's $s0
-	sw	$s1, 8($sp)			# store caller's $s1
-	sw	$s2, 4($sp)			# store caller's $s2
-	sw	$s3, 0($sp)			# store caller's $s3
+    addiu	$sp, $sp, -20
+    sw	$a0, 16($sp)			# store string pointer
+    sw	$s0, 12($sp)			# store caller's $s0
+    sw	$s1, 8($sp)			# store caller's $s1
+    sw	$s2, 4($sp)			# store caller's $s2
+    sw	$s3, 0($sp)			# store caller's $s3
 
-	addi	$s0, $0, 10			# $t0 = '\n'
-	addi	$s1, $0, 0			# $t0 = '\0'
+    addi	$s0, $0, 10			# $t0 = '\n'
+    addi	$s1, $0, 0			# $t0 = '\0'
 shouldwrap_ver_wl:
-	lb	$s3, 0($a0)			# $s3 = *string
-	beq	$s3, $s0, shouldwrap_ver_ret	# if(*string == '\n')
-	addi	$a0, $a0, 1			# string++
-	j	shouldwrap_ver_wl		# while(*string != '\n')
+    lb	$s3, 0($a0)			# $s3 = *string
+    beq	$s3, $s0, shouldwrap_ver_ret	# if(*string == '\n')
+    addi	$a0, $a0, 1			# string++
+    j	shouldwrap_ver_wl		# while(*string != '\n')
 shouldwrap_ver_ret:
         addi	$a0, $a0, 1			# string++
-	lb	$s3, 0($a0)			# *string
-	seq	$v0, $s3, $s1
-	lw	$s3, 0($sp)
-	lw	$s2, 4($sp)
-	lw	$s1, 8($sp)
-	lw	$s0, 12($sp)
-	lw	$a0, 16($sp)			# restore string pointer
-	addiu	$sp, $sp, 20
-	jr	$ra
+    lb	$s3, 0($a0)			# *string
+    seq	$v0, $s3, $s1
+    lw	$s3, 0($sp)
+    lw	$s2, 4($sp)
+    lw	$s1, 8($sp)
+    lw	$s0, 12($sp)
+    lw	$a0, 16($sp)			# restore string pointer
+    addiu	$sp, $sp, 20
+    jr	$ra
 
 # FUNCTION: int shouldwrap_dia(char *string)
 # parameters
@@ -485,43 +485,43 @@ shouldwrap_ver_ret:
 # $s1 = '\0'
 # $s2 = string + 1
 shouldwrap_dia:
-	addiu	$sp, $sp, -20
-	sw	$a0, 16($sp)			# store string pointer
-	sw	$s0, 12($sp)			# store caller's $s0
-	sw	$s1, 8($sp)			# store caller's $s1
-	sw	$s2, 4($sp)			# store caller's $s2
-	sw	$s3, 0($sp)			# store caller's $s3
+    addiu	$sp, $sp, -20
+    sw	$a0, 16($sp)			# store string pointer
+    sw	$s0, 12($sp)			# store caller's $s0
+    sw	$s1, 8($sp)			# store caller's $s1
+    sw	$s2, 4($sp)			# store caller's $s2
+    sw	$s3, 0($sp)			# store caller's $s3
 
-	addi	$s0, $0, 10			# $t0 = '\n'
-	addi	$s1, $0, 0			# $t0 = '\0'
-	addi	$s2, $a0, 1			# (string + 1) NB +1, because char *
-	lb	$s2, 0($s2)			# $s2 = *(string + 1)
-	beq	$s2, $s0, shouldwrap_dia_ret1	# if(*(string + 1) == '\n')
+    addi	$s0, $0, 10			# $t0 = '\n'
+    addi	$s1, $0, 0			# $t0 = '\0'
+    addi	$s2, $a0, 1			# (string + 1) NB +1, because char *
+    lb	$s2, 0($s2)			# $s2 = *(string + 1)
+    beq	$s2, $s0, shouldwrap_dia_ret1	# if(*(string + 1) == '\n')
 shouldwrap_dia_wl:
-	lb	$s3, 0($a0)			# $s3 = *string
-	beq	$s3, $s0, shouldwrap_dia_ret	# if(*string == '\n')
-	addi	$a0, $a0, 1			# string++
-	j	shouldwrap_dia_wl		# while(*string != '\n')
+    lb	$s3, 0($a0)			# $s3 = *string
+    beq	$s3, $s0, shouldwrap_dia_ret	# if(*string == '\n')
+    addi	$a0, $a0, 1			# string++
+    j	shouldwrap_dia_wl		# while(*string != '\n')
 shouldwrap_dia_ret:
-	addi	$a0, $a0, 1			# string++
-	lb	$s3, 0($a0)			# *string
-	seq	$v0, $s3, $s1
-	lw	$s3, 0($sp)
-	lw	$s2, 4($sp)
-	lw	$s1, 8($sp)
-	lw	$s0, 12($sp)
-	lw	$a0, 16($sp)			# restore string pointer
-	addiu	$sp, $sp, 20
-	jr	$ra
+    addi	$a0, $a0, 1			# string++
+    lb	$s3, 0($a0)			# *string
+    seq	$v0, $s3, $s1
+    lw	$s3, 0($sp)
+    lw	$s2, 4($sp)
+    lw	$s1, 8($sp)
+    lw	$s0, 12($sp)
+    lw	$a0, 16($sp)			# restore string pointer
+    addiu	$sp, $sp, 20
+    jr	$ra
 shouldwrap_dia_ret1:
-	lw	$s3, 0($sp)
-	lw	$s2, 4($sp)
-	lw	$s1, 8($sp)
-	lw	$s0, 12($sp)
-	lw	$a0, 16($sp)			# restore string pointer
-	addiu	$sp, $sp, 20
-	addi	$v0, $0, 1
-	jr	$ra
+    lw	$s3, 0($sp)
+    lw	$s2, 4($sp)
+    lw	$s1, 8($sp)
+    lw	$s0, 12($sp)
+    lw	$a0, 16($sp)			# restore string pointer
+    addiu	$sp, $sp, 20
+    addi	$v0, $0, 1
+    jr	$ra
 
 #----------------------------------------------------------------
 # END OF CODE
