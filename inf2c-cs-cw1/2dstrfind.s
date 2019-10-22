@@ -192,7 +192,7 @@ main_end:
 # $s5 = int	ycoord
 # $t5 = char *	word
 strfind:
-	subiu	$sp, $sp, 20
+	addiu	$sp, $sp, -20
 	sw	$ra, 16($sp)			# store $ra
 	sw	$s2, 12($sp)			# store caller's $s2
 	sw	$s3, 8($sp)			# store caller's $s3
@@ -327,7 +327,7 @@ contain_ver_wl:
 	bne	$t0, $t1, contain_r		# this is the same for contain_hor
 	addi	$a1, $a1, 1			# word++;
 	# check if we're on the last row.
-	subiu	$sp, $sp, 4
+	addiu	$sp, $sp, -4
 	sw	$ra, 0($sp)
 	jal	lastrow				# $v0 = lastrow(string)
 	lw	$ra, 0($sp)
@@ -354,7 +354,7 @@ contain_dia_wl:
 	bne	$t0, $t1, contain_r		# if(*string != *word)
 	addi	$a1, $a1, 1			# word++;
 	# check if we're on the last row.
-	subiu	$sp, $sp, 4
+	addiu	$sp, $sp, -4
 	sw	$ra, 0($sp)
 	jal	lastrow				# $v0 = lastrow(string)
 	lw	$ra, 0($sp)
@@ -425,7 +425,7 @@ print_match_b:
 # $s1 = '\0'
 # $s2 = string + 1
 lastrow:
-	subiu	$sp, $sp, 20
+	addiu	$sp, $sp, -20
 	sw	$a0, 16($sp)			# store string pointer
 	sw	$s0, 12($sp)			# store caller's $s0
 	sw	$s1, 8($sp)			# store caller's $s1

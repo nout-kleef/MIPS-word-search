@@ -192,7 +192,7 @@ main_end:
 # $s5 = int	ycoord
 # $t5 = char *	word
 strfind:
-	subiu	$sp, $sp, 20
+	addiu	$sp, $sp, -20
 	sw	$ra, 16($sp)			# store $ra
 	sw	$s2, 12($sp)			# store caller's $s2
 	sw	$s3, 8($sp)			# store caller's $s3
@@ -324,7 +324,7 @@ contain_ver_wl:
 	lb	$t1, 0($a1)			# $t1 = *word
 	# NB: contain_r is "part of" contain_hor, but it contains the same instructions
 	bne	$t0, $t1, contain_r		# this is the same for contain_hor
-	subiu	$sp, $sp, 4			# PUSH $ra
+	addiu	$sp, $sp, -4			# PUSH $ra
 	sw	$ra, 0($sp)
 	move	$t1, $a0			# temporarily store
 	jal	shouldwrap_ver			# shouldwrap(string)
@@ -365,7 +365,7 @@ contain_dia_wl:
 	lb	$t0, 0($a0)			# $t0 = *string
 	lb	$t1, 0($a1)			# $t1 = *word
 	bne	$t0, $t1, contain_r		# if(*string != *word)
-	subiu	$sp, $sp, 4			# PUSH $ra
+	addiu	$sp, $sp, -4			# PUSH $ra
 	sw	$ra, 0($sp)
 	move	$t1, $a0			# temporarily store
 	jal	shouldwrap_dia			# shouldwrap(string)
@@ -385,9 +385,9 @@ contain_dia_wrap_wl:
 	and	$t0, $t0, $t1			# row > 0 && col > 0
 	beqz	$t0, contain_dia_finloop	# break loop & finish main iteration
 	sub	$a0, $a0, $s7
-	subi	$a0, $a0, 1			# string -= grid_num_cols + 1
-	subi	$t8, $t8, 1			# row--;
-	subi	$t9, $t9, 1			# col--;
+	addi	$a0, $a0, -1			# string -= grid_num_cols + 1
+	addi	$t8, $t8, -1			# row--;
+	addi	$t9, $t9, -1			# col--;
 	j	contain_dia_wrap_wl		# }
 contain_dia_finloop:
 	addi	$a1, $a1, 1			# word++; // +1, because char *
@@ -449,7 +449,7 @@ print_match_b:
 # $s1 = '\0'
 # $s2 = string + 1
 shouldwrap_ver:
-	subiu	$sp, $sp, 20
+	addiu	$sp, $sp, -20
 	sw	$a0, 16($sp)			# store string pointer
 	sw	$s0, 12($sp)			# store caller's $s0
 	sw	$s1, 8($sp)			# store caller's $s1
@@ -464,7 +464,7 @@ shouldwrap_ver_wl:
 	addi	$a0, $a0, 1			# string++
 	j	shouldwrap_ver_wl		# while(*string != '\n')
 shouldwrap_ver_ret:
-	addi	$a0, $a0, 1			# string++
+        addi	$a0, $a0, 1			# string++
 	lb	$s3, 0($a0)			# *string
 	seq	$v0, $s3, $s1
 	lw	$s3, 0($sp)
@@ -485,7 +485,7 @@ shouldwrap_ver_ret:
 # $s1 = '\0'
 # $s2 = string + 1
 shouldwrap_dia:
-	subiu	$sp, $sp, 20
+	addiu	$sp, $sp, -20
 	sw	$a0, 16($sp)			# store string pointer
 	sw	$s0, 12($sp)			# store caller's $s0
 	sw	$s1, 8($sp)			# store caller's $s1

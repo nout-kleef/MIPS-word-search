@@ -169,7 +169,7 @@ main_end:
 # $t4 = int 	grid_idx
 # $t5 = char *	word
 strfind:
-	subiu	$sp, $sp, 12
+	addiu	$sp, $sp, -12
 	sw	$ra, 8($sp)			# store $ra
 	sw	$s2, 4($sp)			# store caller's $s2
 	sw	$s3, 0($sp)			# store caller's $s3
