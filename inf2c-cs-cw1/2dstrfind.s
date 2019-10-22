@@ -237,7 +237,7 @@ strfind_ver_check:
 	move	$a0, $s5			# ycoord
 	move	$a1, $s4			# xcoord
 	move	$a2, $t5			# word
-	li	$a3, 0x56			# 'H'
+	li	$a3, 0x56			# 'V'
 	jal	print_match			# print_match(ycoord, xcoord, word, 'V');
 	addi	$s3, $0, 1			# wordfound = 1;
 strfind_dia_check:
